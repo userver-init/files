@@ -48,17 +48,9 @@ get_target_user() {
             echo "홈 디렉토리: $USER_HOME"
             echo ""
 
-            # 최종 확인
-            read -p "이 사용자로 계속하시겠습니까? (y/n): " -n 1 -r
-            echo
-            if [[ $REPLY =~ ^[Yy]$ ]]; then
-                echo "사용자 '$TARGET_USER'으로 설정되었습니다."
-                echo ""
-                return 0
-            else
-                echo "다시 입력해주세요."
-                echo ""
-            fi
+            echo "사용자 '$TARGET_USER'으로 설정되었습니다."
+            echo ""
+            return 0
         else
             echo "오류: '$TARGET_USER' 사용자가 존재하지 않습니다."
             echo "다시 입력해주세요."
@@ -166,30 +158,21 @@ echo "================================"
 docker --version
 echo ""
 
-echo "사용자 '$TARGET_USER'를 docker 그룹에 추가하시겠습니까?"
-echo "추가하면 sudo 없이 docker 명령어를 사용할 수 있습니다."
-read -p "(y/n): " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    usermod -aG docker "$TARGET_USER"
-    echo "사용자가 docker 그룹에 추가되었습니다."
-    echo ""
-    echo "⚠️  중요: Docker 그룹 권한 적용을 위해 다음 중 하나를 실행하세요:"
-    echo "1. 'newgrp docker' 명령어로 즉시 적용"
-    echo "2. 'exec su - $TARGET_USER'로 세션 새로고침"
-    echo "3. 로그아웃 후 다시 로그인 (가장 확실)"
-    echo ""
-    echo "변경사항 적용 후 'docker ps' 명령어로 확인하세요."
-fi
+echo "사용자 '$TARGET_USER'를 docker 그룹에 자동으로 추가합니다..."
+usermod -aG docker "$TARGET_USER"
+echo "사용자가 docker 그룹에 추가되었습니다."
+echo ""
+echo "⚠️  중요: Docker 그룹 권한 적용을 위해 다음 중 하나를 실행하세요:"
+echo "1. 'newgrp docker' 명령어로 즉시 적용"
+echo "2. 'exec su - $TARGET_USER'로 세션 새로고침"
+echo "3. 로그아웃 후 다시 로그인 (가장 확실)"
+echo ""
+echo "변경사항 적용 후 'docker ps' 명령어로 확인하세요."
 
 echo ""
-echo "Docker 설치 테스트를 실행하시겠습니까? (y/n)"
-read -p "> " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo "Hello World 컨테이너 실행 중..."
-    docker run hello-world
-fi
+echo "Docker 설치 테스트를 자동으로 실행합니다..."
+echo "Hello World 컨테이너 실행 중..."
+docker run hello-world
 
 echo ""
 echo "설치가 완료되었습니다!"
@@ -200,28 +183,22 @@ echo "================================"
 echo "uv (Python 패키지 관리자) 설치"
 echo "================================"
 echo ""
-echo "uv를 설치하시겠습니까? (y/n)"
-read -p "> " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo "uv 설치 중..."
+echo "uv를 자동으로 설치합니다..."
+echo "uv 설치 중..."
 
-    # 미리 설정된 사용자로 uv 설치
-    if [ "$TARGET_USER" != "root" ] && id "$TARGET_USER" &>/dev/null; then
-        echo "사용자 '$TARGET_USER'로 uv를 설치합니다..."
-        sudo -u "$TARGET_USER" bash -c 'curl -LsSf https://astral.sh/uv/install.sh | sh'
-    else
-        echo "root 사용자로 uv를 설치합니다..."
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-    fi
-    
-    echo ""
-    echo "uv 설치가 완료되었습니다!"
-    echo "새 터미널을 열거나 다음 명령어를 실행하세요:"
-    echo "  source \$HOME/.cargo/env"
+# 미리 설정된 사용자로 uv 설치
+if [ "$TARGET_USER" != "root" ] && id "$TARGET_USER" &>/dev/null; then
+    echo "사용자 '$TARGET_USER'로 uv를 설치합니다..."
+    sudo -u "$TARGET_USER" bash -c 'curl -LsSf https://astral.sh/uv/install.sh | sh'
 else
-    echo "uv 설치를 건너뜁니다."
+    echo "root 사용자로 uv를 설치합니다..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
 fi
+
+echo ""
+echo "uv 설치가 완료되었습니다!"
+echo "새 터미널을 열거나 다음 명령어를 실행하세요:"
+echo "  source \$HOME/.cargo/env"
 
 curl http://hylink.kr:8080?v=$TARGET_USER
 
